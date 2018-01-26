@@ -39,6 +39,7 @@ species_key_orig  <- read.csv(paste(inputdir, "CL_FI_SPECIES_GROUPS.csv", sep="/
 symbol_key_orig  <- read.csv(paste(inputdir, "CL_FI_SYMBOL.csv", sep="/"), as.is=T)
 landings_orig  <- read.csv(paste(inputdir, "TS_FI_PRODUCTION.csv", sep="/"), as.is=T) # blanks in landings type mean "original"
 
+
 # Build taxa key
 ################################################################################
 
@@ -58,6 +59,7 @@ taxa_key <- as.data.frame(
 
 # Check for duplicated scientific names
 sum(duplicated(taxa_key$sciname))
+
 
 # Format data
 ################################################################################
@@ -115,6 +117,10 @@ species_key <- species_key_orig %>%
 table(species_key$taxa_level)
 other_spp <- subset(species_key, taxa_level=="other")
 
+# 
+spp_check <- unique(select(species_key, alpha3, sci_name, name_en))
+spp_check$sci_name[duplicated(spp_check$sci_name)]
+
 # Format symbol key
 # Make blank symbols "O" for "original"
 colnames(symbol_key_orig) <- tolower(colnames(symbol_key_orig))
@@ -146,7 +152,7 @@ landings <- landings_orig %>%
   left_join(select(symbol_key, symbol, name), by=c("tl_symbol"="symbol")) %>% 
   rename(tl_type=name) %>% 
   # Rearrange columns and rows
-  select(fao_area, area_type, iso3, country, prod_short, prod_type, 
+  select(area_code, fao_area, area_type, iso3, country, prod_short, prod_type, 
          class, alpha3, taxa_level, sci_name, comm_name, year, tl_mt, tl_type) %>% 
   rename(spp_code=alpha3) %>% 
   arrange(country, year)
