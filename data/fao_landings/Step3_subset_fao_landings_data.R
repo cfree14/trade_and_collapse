@@ -21,17 +21,6 @@ tabledir <- "tables"
 load(paste(datadir, "1950_2017_FAO_landings_data_all.Rdata", sep="/"))
 load(paste(datadir, "FAO_marine_species_resilience_plus.Rdata", sep="/"))
 
-# Sample size table
-################################################################################
-
-# Filters to apply
-# 1. Marine
-# 2. Wild capture
-# 3. Finfish and invertebrates only (no marine mammals, birds, turtles, etc.)
-# 2. Species-level taxa
-# 3. >20 years and >1,000 t of catch (after trimming initial 0s!)
-
-
 # Subset data
 ################################################################################
 
@@ -41,7 +30,7 @@ load(paste(datadir, "FAO_marine_species_resilience_plus.Rdata", sep="/"))
 # 3. Finfish and invertebrates only (no marine mammals, birds, turtles, etc.)
 # 4. Species-level taxa
 # 5. >20 years and >1,000 t of catch (after trimming initial 0s!)
-# 6 Stocks in weird species categories
+# 6. Stocks that can't be placed in mPRM species categories
 
 # Life history categories
 lh_catgs <- sort(unique(spp_lh_data$lh_catg))
@@ -55,14 +44,13 @@ data_raw <- landings %>%
   filter(prod_type=="Capture production") %>% 
   filter(class %in% c("Pisces", "Mollusca", "Crustacea", "Invertebrata Aquatica")) %>% 
   filter(taxa_level=="species") %>% 
-  arrange(country, sci_name, year)
+  mutate(stockid=paste0(area_code, spp_code)) %>% 
+  select(stockid, area_code, spp_code, everything())
 
 # Aggregate annual landings of each species by area
 data_sum <- data_raw %>% 
-  group_by(fao_area, spp_code, sci_name, comm_name, year) %>% 
-  summarize(tl=sum(tl_mt)) %>% 
-  mutate(stockid=paste(fao_area, sci_name)) %>% 
-  select(stockid, everything())
+  group_by(stockid, fao_area, sci_name, comm_name, year) %>% 
+  summarize(tl=sum(tl_mt))
 
 # Identify stocks with 0 catch (necessary for trimming)
 stocks0 <- data_sum %>% 
@@ -88,7 +76,7 @@ stocks <- data_sum_trim %>%
   # Filter by catch statistics
   filter(nyr>=20 & tl_median>=1000) %>% 
   # Add key life history information
-  left_join(select(spp_lh_data, sci_name_orig, sci_name_fb, lh_catg, resilience), by=c("sci_name"="sci_name_orig")) %>% 
+  left_join(unique(select(spp_lh_data, sci_name_orig, sci_name_fb, lh_catg, resilience)), by=c("sci_name"="sci_name_orig")) %>% 
   # Remove stocks with "bad" life history categories
   filter(lh_catg%in%lh_catgs_good) %>%
   # Rename columns and reorder
