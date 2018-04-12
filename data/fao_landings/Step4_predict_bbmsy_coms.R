@@ -90,7 +90,7 @@ if(fit_examples==F){
 # bbmsy_q2.5, bbmsy_q25, bbmsy_q50, bbmsy_q75, bbmsy_q97.5 (bbmsy_avg, bbmsy_sd, convergence)
 
 # Which model?
-com_to_fit <- "zbrt"
+com_to_fit <- "cmsy13"
 
 # Loop through stocks and fit model: i <- 1
 # for(i in 1:3){
