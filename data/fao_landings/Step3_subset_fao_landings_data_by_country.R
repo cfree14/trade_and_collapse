@@ -21,7 +21,8 @@ tabledir <- "tables"
 load(paste(datadir, "1950_2017_FAO_landings_data_all.Rdata", sep="/"))
 load(paste(datadir, "FAO_marine_species_resilience_plus.Rdata", sep="/"))
 
-# Subset data
+
+# Build data
 ################################################################################
 
 # Filters to apply
@@ -32,6 +33,10 @@ load(paste(datadir, "FAO_marine_species_resilience_plus.Rdata", sep="/"))
 # 5. >20 years and >1,000 t of catch (after trimming initial 0s!)
 # 6. Stocks that can't be placed in mPRM species categories
 
+# Define a stock as:
+# FAO Area-Country-Species
+# Using FAO Area & Country accounts for biogeographical breaks (e.g., US East vs. West Coast)
+
 # Life history categories
 lh_catgs <- sort(unique(spp_lh_data$lh_catg))
 lh_catgs_bad <- c("Barnacles", "Corals", "Horseshoe crabs", "Jellyfish",
@@ -39,62 +44,72 @@ lh_catgs_bad <- c("Barnacles", "Corals", "Horseshoe crabs", "Jellyfish",
 lh_catgs_good <- lh_catgs[!lh_catgs%in%lh_catgs_bad]
 
 # Subset landings to species of interest
+# Note: stockid is based on IS03 and ALPHA3 b/c these are only unique fields
 data_raw <- landings %>% 
   filter(area_type=="marine") %>% 
   filter(prod_type=="Capture production") %>% 
   filter(class %in% c("Pisces", "Mollusca", "Crustacea", "Invertebrata Aquatica")) %>% 
   filter(taxa_level=="species") %>% 
-  mutate(stockid=paste0(iso3, spp_code)) %>% 
-  select(stockid, iso3, spp_code, everything())
-
-# Aggregate annual landings of each species by area
-data_sum <- data_raw %>% 
-  group_by(stockid, iso3, sci_name, comm_name, year) %>% 
-  summarize(tl=sum(tl_mt))
+  mutate(stockid=paste(area_code, iso3, spp_code, sep="-")) %>% 
+  select(stockid, area_code, iso3, spp_code, everything())
 
 # Identify stocks with 0 catch (necessary for trimming)
-stocks0 <- data_sum %>% 
+stocks0 <- data_raw %>% 
   group_by(stockid) %>% 
-  summarize(tl=sum(tl)) %>% 
-  filter(tl==0)
+  summarize(tl_mt=sum(tl_mt)) %>% 
+  filter(tl_mt==0)
 
 # Trim leading 0s
 # Remove stocks with 0 catch then trim leading zeros
-data_sum_trim <- data_sum %>%
+data_trim <- data_raw %>%
   filter(!(stockid %in% stocks0$stockid)) %>% 
   group_by(stockid) %>%
-  filter(year%in%c(min(year[which(tl!=0)]):max(year)))
+  filter(year%in%c(min(year[which(tl_mt!=0)]):max(year)))
 
 # Create stocks data frame
-stocks <- data_sum_trim %>% 
-  group_by(stockid, iso3, sci_name, comm_name) %>% 
+stocks <- data_trim %>% 
+  group_by(stockid, area_code, fao_area, iso3, country, spp_code, sci_name, comm_name) %>% 
   # Calculate catch statistics
   summarize(nyr=n(),
-            tl_median=median(tl),
+            tl_mt_median=median(tl_mt),
             year1=min(year),
             year2=max(year)) %>% 
   # Filter by catch statistics
-  filter(nyr>=20 & tl_median>=1000) %>% 
+  filter(nyr>=20 & tl_mt_median>=1000) %>% 
   # Add key life history information
   left_join(unique(select(spp_lh_data, sci_name_orig, sci_name_fb, lh_catg, resilience)), by=c("sci_name"="sci_name_orig")) %>% 
   # Remove stocks with "bad" life history categories
   filter(lh_catg%in%lh_catgs_good) %>%
   # Rename columns and reorder
-  rename(sci_name_orig=sci_name) %>% 
-  select(stockid:sci_name_orig, sci_name_fb, comm_name, year1, year2, nyr, tl_median, lh_catg, resilience)
+  rename(sci_name_orig=sci_name, fao_code=area_code) %>% 
+  select(stockid:sci_name_orig, sci_name_fb, comm_name, year1, year2, nyr, tl_mt_median, lh_catg, resilience)
 apply(stocks, 2, function(x) sum(is.na(x)))
+anyDuplicated(stocks$stockid)
 
 # Reduce trimmed data to only stocks used in the analysis
-data <- data_sum_trim %>%
-  filter(stockid %in% stocks$stockid)
+data <- data_trim %>%
+  filter(stockid %in% stocks$stockid) %>% 
+  rename(fao_code=area_code) %>% 
+  select(stockid, fao_code, fao_area, iso3, country,
+         class, sci_name, comm_name, year, tl_mt, tl_type)
+  
 
-
-# Inspect final sample size
+# Inspect sample size
 ################################################################################
 
-# Sample size table
-nstocks <- as.data.frame(table(stocks$fao_area))
-write.csv(nstocks, paste(tabledir, "Table2_stock_stats.csv", sep="/"))
+# Number of stocks
+nrow(stocks)
+
+# Number of stocks by FAO area
+n_by_area <- stocks %>%
+  group_by(area_code, fao_area) %>% 
+  summarize(n=n())
+
+# Number of stocks by country
+n_by_country <- stocks %>%
+  group_by(iso3, country) %>% 
+  summarize(n=n())
+
 
 # Export data
 ################################################################################
