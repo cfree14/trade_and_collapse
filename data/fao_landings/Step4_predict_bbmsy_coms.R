@@ -90,11 +90,7 @@ load(paste(datadir, "1950_2017_FAO_landings_data_use.Rdata", sep="/"))
 # bbmsy_q2.5, bbmsy_q25, bbmsy_q50, bbmsy_q75, bbmsy_q97.5 (bbmsy_avg, bbmsy_sd, convergence)
 
 # Which model?
-<<<<<<< HEAD
-com_to_fit <- "sscom"
-=======
-com_to_fit <- "cmsy13"
->>>>>>> cbf4d71992bc73d117ab1925bb4f357c79aaa67c
+com_to_fit <- "comsir"
 
 # Loop through stocks and fit model: i <- 1
 # for(i in 1:3){
@@ -145,15 +141,9 @@ for(i in 1:nrow(stocks)){
   # Fit COMSIR
   if(com_to_fit=="comsir"){
     bbmsy_ts <- try({
-<<<<<<< HEAD
-      comsir_nposterior <- 2000000
-      comsir_nburnin <- comsir_nposterior*0.05
-      comsir_output <- comsir(yr=sdata$year, ct=sdata$tl, start_r=resilience(res),
-=======
       comsir_nposterior <- 1000000
-      comsir_nburnin <- nposterior*0.05
+      comsir_nburnin <- comsir_nposterior*0.05
       comsir_output <- comsir(yr=sdata$year, ct=sdata$tl_mt, start_r=resilience(res),
->>>>>>> cbf4d71992bc73d117ab1925bb4f357c79aaa67c
                               nsim=comsir_nburnin, n_posterior=comsir_nposterior)
       bbmsy_ts <- comsir_output$bbmsy %>%
         mutate(stockid=stock, method="COMSIR") %>% 
@@ -174,14 +164,8 @@ for(i in 1:nrow(stocks)){
   
   # Save B/BMSY time series
   if(!inherits(bbmsy_ts, "try-error")){
-<<<<<<< HEAD
-    # if(i==1){bbmsy_ts_all <- bbmsy_ts}else{bbmsy_ts_all <- rbind(bbmsy_ts_all, bbmsy_ts)}
-    if(exists("bbmsy_ts_all")==F){bbmsy_ts_all <- bbmsy_ts}else{bbmsy_ts_all <- rbind(bbmsy_ts_all, bbmsy_ts)}
-    
-=======
     if(!exists("bbmsy_ts_all")){bbmsy_ts_all <- bbmsy_ts}
     if(i==1){bbmsy_ts_all <- bbmsy_ts}else{bbmsy_ts_all <- rbind(bbmsy_ts_all, bbmsy_ts)}
->>>>>>> cbf4d71992bc73d117ab1925bb4f357c79aaa67c
   }
   
 }
