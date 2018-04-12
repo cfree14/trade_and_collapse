@@ -164,6 +164,7 @@ for(i in 1:nrow(stocks)){
   
   # Save B/BMSY time series
   if(!inherits(bbmsy_ts, "try-error")){
+    if(!exists("bbmsy_ts_all")){bbmsy_ts_all <- bbmsy_ts}
     if(i==1){bbmsy_ts_all <- bbmsy_ts}else{bbmsy_ts_all <- rbind(bbmsy_ts_all, bbmsy_ts)}
   }
   
