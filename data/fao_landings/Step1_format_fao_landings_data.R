@@ -9,7 +9,6 @@
 
 # TO DO LIST
 # Fix missing species common names
-# Fix missing country ISO3s
 # Could correct scientific names, improve taxa level
 # Species designations are imperect - () and commas are indicators
 
@@ -20,6 +19,7 @@ rm(list = ls())
 ################################################################################
 
 # Packages
+library(freeR)
 library(plyr)
 library(dplyr)
 library(tools)
@@ -48,14 +48,12 @@ taxa_key_fb <- load_taxa()
 taxa_key_slb <- sealifebase
 
 # Combine taxa keys
-taxa_key <- as.data.frame(
-  taxa_key_fb %>%
-    bind_rows(taxa_key_slb) %>% 
-    setNames(tolower(names(.))) %>% 
-    mutate(sciname=paste(genus, species)) %>% 
-    select(class, order, family, genus, species, sciname) %>% 
-    unique()
-)
+taxa_key <-  taxa_key_fb %>%
+  bind_rows(taxa_key_slb) %>% 
+  setNames(tolower(names(.))) %>% 
+  mutate(sciname=paste(genus, species)) %>% 
+  select(class, order, family, genus, species, sciname) %>% 
+  unique()
 
 # Check for duplicated scientific names
 sum(duplicated(taxa_key$sciname))
@@ -70,11 +68,12 @@ prod_key <- prod_key_orig %>%
   rename(prod_code=code, name_en=name_e, name_fr=name_f, name_es=name_s) %>% 
   mutate(name_en=revalue(name_en, c("Aquaculture (brackishwater)"="Aquaculture (brackish water)")),
          prod_short=revalue(name_en, c("Aquaculture"="A", 
-                                        "Aquaculture (marine)"="ASW",
-                                        "Aquaculture (freshwater)"="AFW",
-                                        "Aquaculture (brackish water)"="ABW",
-                                        "Capture production"="WC"))) %>% 
+                                       "Aquaculture (marine)"="ASW",
+                                       "Aquaculture (freshwater)"="AFW",
+                                       "Aquaculture (brackish water)"="ABW",
+                                       "Capture production"="WC"))) %>% 
   select(prod_code, prod_short, everything())
+complete(prod_key)
 
 # Format area key
 colnames(area_key_orig) <- tolower(colnames(area_key_orig))
@@ -82,7 +81,8 @@ area_key <- area_key_orig %>%
   rename(area_code=code, ocean=ocean_group, region=major_group, subregion=faregion_group) %>% 
   mutate(area_type=ifelse(grepl("Inland", name_en), "inland", "marine")) %>% 
   select(area_code, area_type, everything())
-  
+complete(area_key)
+
 # Format country key
 # The column names are in a wierd order
 colnames(country_key_orig) <- tolower(colnames(country_key_orig))
@@ -92,6 +92,9 @@ colnames(country_key_orig) <- colnames.fixed
 country_key <- country_key_orig %>% 
   rename(gis_code=figis_id, iso2=iso2_code, iso3=iso3_code,
          contininent=continent_group, ecoclass=ecoclass_group, region=region_group)
+country_key$iso2[is.na(country_key$iso2)] <- paste0("UN", 1:sum(is.na(country_key$iso2)))
+country_key$iso3[is.na(country_key$iso3)] <- paste0("UNK", 1:sum(is.na(country_key$iso3)))
+complete(country_key)
 
 # Format species key
 # For more on taxa codes: http://www.fao.org/fishery/collection/asfis/en
@@ -116,10 +119,12 @@ species_key <- species_key_orig %>%
   select(alpha3, taxa_code, taxa_level, sci_name, everything())
 table(species_key$taxa_level)
 other_spp <- subset(species_key, taxa_level=="other")
+complete(species_key)
 
-# 
-spp_check <- unique(select(species_key, alpha3, sci_name, name_en))
-spp_check$sci_name[duplicated(spp_check$sci_name)]
+# Inspect species key
+spp_check <- unique(select(species_key, alpha3, sci_name, name_en)) # simplify to scan through
+anyDuplicated(species_key$alpha3) # no duplicated ALPHA3s
+spp_check$sci_name[duplicated(spp_check$sci_name)] # but there are duplicated SCINAMES
 
 # Format symbol key
 # Make blank symbols "O" for "original"
@@ -157,17 +162,15 @@ landings <- landings_orig %>%
   rename(spp_code=alpha3) %>% 
   arrange(country, year)
 
-# Inspect completeness
-apply(landings, 2, function(x) sum(is.na(x)))
+# Inspect
+complete(landings)
 
 
 # Export data
 ################################################################################
 
 # Export data
+write.csv(landings, paste(outputdir, "1950_2017_FAO_landings_data.csv", sep="/"), row.names=F)
 save(landings, species_key, country_key, prod_key, area_key, symbol_key, taxa_key,
      file=paste(outputdir, "1950_2017_FAO_landings_data_all.Rdata", sep="/"))
 
-
-  
-  
