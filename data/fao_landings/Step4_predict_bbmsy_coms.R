@@ -90,7 +90,7 @@ load(paste(datadir, "1950_2017_FAO_landings_data_use.Rdata", sep="/"))
 # bbmsy_q2.5, bbmsy_q25, bbmsy_q50, bbmsy_q75, bbmsy_q97.5 (bbmsy_avg, bbmsy_sd, convergence)
 
 # Which model?
-com_to_fit <- "cmsy13"
+com_to_fit <- "comsir"
 
 # Loop through stocks and fit model: i <- 1
 # for(i in 1:3){
@@ -142,7 +142,7 @@ for(i in 1:nrow(stocks)){
   if(com_to_fit=="comsir"){
     bbmsy_ts <- try({
       comsir_nposterior <- 1000000
-      comsir_nburnin <- nposterior*0.05
+      comsir_nburnin <- comsir_nposterior*0.05
       comsir_output <- comsir(yr=sdata$year, ct=sdata$tl_mt, start_r=resilience(res),
                               nsim=comsir_nburnin, n_posterior=comsir_nposterior)
       bbmsy_ts <- comsir_output$bbmsy %>%

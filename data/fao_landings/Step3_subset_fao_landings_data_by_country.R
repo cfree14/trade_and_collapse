@@ -102,7 +102,7 @@ nrow(stocks)
 
 # Number of stocks by FAO area
 n_by_area <- stocks %>%
-  group_by(area_code, fao_area) %>% 
+  group_by(fao_code, fao_area) %>% 
   summarize(n=n())
 
 # Number of stocks by country
