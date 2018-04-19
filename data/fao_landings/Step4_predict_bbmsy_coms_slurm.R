@@ -101,10 +101,10 @@ fit_com <- function(stock, com){
   }
   
   # 
-  if(!inherits(bbmsy_ts, "try-error")){
-    if(!exists("bbmsy_ts_all")){bbmsy_ts_all <- bbmsy_ts}
-    if(i==1){bbmsy_ts_all <- bbmsy_ts}else{bbmsy_ts_all <- rbind(bbmsy_ts_all, bbmsy_ts)}
-  }
+  # if(!inherits(bbmsy_ts, "try-error")){
+  #   if(!exists("bbmsy_ts_all")){bbmsy_ts_all <- bbmsy_ts}
+  #   if(i==1){bbmsy_ts_all <- bbmsy_ts}else{bbmsy_ts_all <- rbind(bbmsy_ts_all, bbmsy_ts)}
+  # }
   
   # Return
   return(bbmsy_ts)
@@ -128,11 +128,17 @@ com_to_fit <- "comsir"
 pars <- data.frame(stock=stocks$stockid, com=com_to_fit)
 
 # Create SLURM job
-sjob <- slurm_apply(fit_com, pars, jobname = 'test_apply',
-                    nodes = 2, cpus_per_node = 2, submit = FALSE)
+# 21 nodes available (for empty queue), start with 10, each node has 8 CPUs
+# For testing: slurm_options=list(partition="sesynctest", time="1:00:00"), 2 nodes, 4 cores, limits jobs to 1 hour
+# For real: slurm_options=list(partition="sesynctest")
+sjob <- slurm_apply(fit_com, pars, jobname = 'fao_com_fits',
+                    nodes = 2, cpus_per_node = 8, submit = T, 
+                    add_objects=c("data", "stocks"), 
+                    slurm_options=list(partition="sesynctest", time="1:00:00"))
 
 # Read in output from SLURM job
-results <- get_slurm_out(sjob, outtype="table")
+# Could export to "/nfs/FISHMAR-data"
+results <- get_slurm_out(sjob, outtype="raw", wait=T)
 
 
 
