@@ -8,3 +8,4 @@ references
 data/fao_landings/data/1950_2017_FAO_landings_data.csv
 data/fao_landings/predictions/example_com_outputs.Rdata
 admin
+_rslurm*
