@@ -9,26 +9,23 @@ rm(list = ls())
 ################################################################################
 
 # Packages
-library(tools)
 library(plyr)
 library(dplyr)
-library(ggplot2)
 library(rfishbase)
-library(datalimited)
-
-# Instal FishLife package
-devtools::install_github("james-thorson/FishLife")
 library(FishLife)
 
 # Directories
 datadir <- "data/fao_landings/data"
 
 # Read data
-load(paste(datadir, "1950_2017_FAO_landings_data_use.Rdata", sep="/"))
+load(paste(datadir, "1950_2017_FAO_landings_data_all.Rdata", sep="/"))
 
 
 # Setup
 ################################################################################
+
+# Species
+species <- sort(unique(stocks$sci_name_fb))
 
 
 
