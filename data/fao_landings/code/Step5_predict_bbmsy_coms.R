@@ -91,11 +91,8 @@ load(paste(datadir, "1950_2017_FAO_landings_data_use.Rdata", sep="/"))
 # bbmsy_q2.5, bbmsy_q25, bbmsy_q50, bbmsy_q75, bbmsy_q97.5 (bbmsy_avg, bbmsy_sd, convergence)
 
 # Which model?
-<<<<<<< HEAD:data/fao_landings/Step4_predict_bbmsy_coms.R
-com_to_fit <- "sscom"
-=======
-com_to_fit <- "ocom"
->>>>>>> 3f86c605052b65fb1a850b3adec70e42fb6fb238:data/fao_landings/code/Step5_predict_bbmsy_coms.R
+com_to_fit <- "cmsy13"
+
 
 # Loop through stocks and fit model: i <- 1
 # for(i in 1:3){
@@ -182,7 +179,7 @@ for(i in 1:nrow(stocks)){
   if(!inherits(bbmsy_ts, "try-error")){
     if(!exists("bbmsy_ts_all")){bbmsy_ts_all <- bbmsy_ts}
     if(i==1){bbmsy_ts_all <- bbmsy_ts}else{bbmsy_ts_all <- rbind(bbmsy_ts_all, bbmsy_ts)}
-    write.csv(bbmsy_ts, paste(sscomdir, paste0(stock, ".csv"), sep="/"), row.names=F)
+    if(com_to_fit=="sscom"){write.csv(bbmsy_ts, paste(sscomdir, paste0(stock, ".csv"), sep="/"), row.names=F)}
     
   }
   
