@@ -21,6 +21,8 @@ tabledir <- "tables"
 load(paste(datadir, "1950_2017_FAO_landings_data_all.Rdata", sep="/"))
 load(paste(datadir, "FAO_marine_species_resilience_plus.Rdata", sep="/"))
 
+# Read stock centroids
+
 
 # Build data
 ################################################################################
