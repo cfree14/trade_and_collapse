@@ -125,20 +125,20 @@ fit_com(com="mprm", stock=stocks$stockid[1])
 com_to_fit <- "comsir"
 
 # Create parameters to apply SLURM job over
-pars <- data.frame(stock=stocks$stockid, com=com_to_fit)
+pars <- data.frame(stock=stocks$stockid[1:10], com=com_to_fit)
 
 # Create SLURM job
 # 21 nodes available (for empty queue), start with 10, each node has 8 CPUs
 # For testing: slurm_options=list(partition="sesynctest", time="1:00:00"), 2 nodes, 4 cores, limits jobs to 1 hour
 # For real: slurm_options=list(partition="sesynctest")
 sjob <- slurm_apply(fit_com, pars, jobname = 'fao_com_fits',
-                    nodes = 2, cpus_per_node = 8, submit = T, 
+                    nodes = 2, cpus_per_node = 4, submit = T, 
                     add_objects=c("data", "stocks"), 
                     slurm_options=list(partition="sesynctest", time="1:00:00"))
 
 # Read in output from SLURM job
 # Could export to "/nfs/FISHMAR-data"
-results <- get_slurm_out(sjob, outtype="raw", wait=T)
+results <- get_slurm_out(sjob, outtype="raw")
 
-
+results
 
