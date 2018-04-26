@@ -91,7 +91,7 @@ load(paste(datadir, "1950_2017_FAO_landings_data_use.Rdata", sep="/"))
 # bbmsy_q2.5, bbmsy_q25, bbmsy_q50, bbmsy_q75, bbmsy_q97.5 (bbmsy_avg, bbmsy_sd, convergence)
 
 # Which model?
-com_to_fit <- "cmsy13"
+com_to_fit <- "comsir"
 
 
 # Loop through stocks and fit model: i <- 1
