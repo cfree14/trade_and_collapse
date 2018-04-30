@@ -80,5 +80,5 @@ for(i in 1:nrow(stocks)){
 
 # Export predictions
 outfile <- paste0("simstock_preds_", com_to_fit, ".csv")
-write.csv(bbmsy_ts_all, paste(preddir, outfile, sep="/"), row.names=F)
+write.csv(bbmsy_ts_all, paste(datadir, outfile, sep="/"), row.names=F)
 
