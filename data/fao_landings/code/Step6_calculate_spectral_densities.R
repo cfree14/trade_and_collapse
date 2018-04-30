@@ -59,13 +59,17 @@ for(i in 1:nrow(stocks)){
   yr_10 <- min(sdata$year) + 9
   yr_max <- max(sdata$year)
   for(j in yr_10:yr_max){
-    tl <- sdata$tl[sdata$year<=j]
+    tl <- sdata$tl_mt[sdata$year<=j]
     spec <- train_spec_mat(tl)
     data$spec_freq_0.05[data$stockid==stock & data$year==j] <- spec$y[spec$x==0.05]
     data$spec_freq_0.20[data$stockid==stock & data$year==j] <- spec$y[spec$x==0.20]
   }
   
 }
+
+# Sort data
+data <- data %>% 
+  arrange(stockid, year)
 
 
 # Export spectral densities
