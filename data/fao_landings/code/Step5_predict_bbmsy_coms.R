@@ -94,7 +94,7 @@ load(paste(datadir, "1950_2017_FAO_landings_data_use.Rdata", sep="/"))
 com_to_fit <- "ocom"
 
 
-# Loop through stocks and fit model: i <- 1
+# Loop through stocks and fit model: i <- 8
 # for(i in 1:3){
 for(i in 1:nrow(stocks)){
   
