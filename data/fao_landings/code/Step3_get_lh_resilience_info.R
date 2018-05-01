@@ -396,7 +396,7 @@ lhdata <- spp_lh_key %>%
          everything())
   
 # Inspect completeness
-complete(lhdata)
+freeR::complete(lhdata)
 
 
 # Export data
