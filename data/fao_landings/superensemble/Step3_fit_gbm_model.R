@@ -17,15 +17,33 @@ library(caret)
 datadir <- "data/fao_landings/superensemble/data"
 
 # Read data
-data_orig <- readRDS(paste(datadir, "simstock_data_orig.Rdata", sep="/"))
+load(paste(datadir, "simstock_data_orig.Rdata", sep="/"))
+coms_orig <- data; rm(data)
 ocom_orig <- read.csv(paste(datadir, "simstock_preds_ocom.csv", sep="/"))
 
 
 # Build data
 ################################################################################
 
+# Format OCOM data
+ocom <- ocom_orig %>% 
+  filter(year==60) %>% 
+  select(stockid, q0.5) %>% 
+  rename(ocom=q0.5)
 
+# Format other predictions
+coms <- coms_orig %>% 
+  filter(year==60) %>% 
+  select(stockid, bbmsy:mprm)
+  
+# Build data
+data <- stocks %>% 
+  select(-bmsy) %>% 
+  left_join(coms, by="stockid") %>% 
+  left_join(ocom, by="stockid")
 
+# Completeness
+freeR::complete(data)
 
 # Fit models
 ################################################################################
