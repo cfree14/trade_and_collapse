@@ -91,7 +91,7 @@ load(paste(datadir, "1950_2017_FAO_landings_data_use.Rdata", sep="/"))
 # bbmsy_q2.5, bbmsy_q25, bbmsy_q50, bbmsy_q75, bbmsy_q97.5 (bbmsy_avg, bbmsy_sd, convergence)
 
 # Which model?
-com_to_fit <- "ocom"
+com_to_fit <- "cmsy17"
 
 
 # Loop through stocks and fit model: i <- 8
@@ -161,6 +161,16 @@ for(i in 1:nrow(stocks)){
       zbrt_output <- zbrt(year=sdata$year, catch=sdata$tl_mt)
       bbmsy_ts <- zbrt_output$ts %>%
         mutate(stockid=stock, method="zBRT") %>% 
+        select(stockid, method, year, everything())
+    })
+  }
+  
+  # Fit cMSY-17
+  if(com_to_fit=="cmsy17"){
+    cmsy17_ts <- try({
+      cmsy17_output <- cmsy2(year=sdata$year, catch=sdata$tl_mt, resilience=res, verbose=F)
+      bbmsy_ts <- cmsy17_output$ref_ts %>%
+        mutate(stockid=stock, method="cMSY-17") %>% 
         select(stockid, method, year, everything())
     })
   }
