@@ -135,10 +135,14 @@ n_by_taxa <- stocks %>%
 
 # Number of stocks by taxa
 n_by_species <- stocks %>% 
-  group_by(sci_name_fb, comm_name) %>% 
-  summarize(n=n())
-sum(n_by_species$n>=10)
-sum(n_by_species$n>=5)
+  group_by(sci_name_orig) %>% 
+  summarize(nstocks=n()) %>% 
+  # Add taxonomic/life history info
+  left_join(lhdata, by=c("sci_name_orig")) %>% 
+  # Rearrange columns
+  select(type, class, order, family, genus, sci_name_orig, sci_name_fb, nstocks)
+sum(n_by_species$nstocks>=10)
+sum(n_by_species$nstocks>=5)
 
 
 # Export data
@@ -147,4 +151,9 @@ sum(n_by_species$n>=5)
 # Export data
 save(data, stocks,
      file=paste(datadir, "1950_2017_FAO_landings_data_use.Rdata", sep="/"))
+
+# Export other useful stuff
+write.csv(stocks, paste(datadir, "FAO_stocks_used_in_analysis.csv", sep="/"), row.names=F)
+write.csv(n_by_species, paste(datadir, "FAO_species_used_in_analysis.csv", sep="/"), row.names=F)
+
   
