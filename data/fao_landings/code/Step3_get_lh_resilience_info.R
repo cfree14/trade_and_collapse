@@ -393,7 +393,9 @@ lhdata <- spp_lh_key %>%
          resilience, resilience_fl, resilience_fb, 
          resilience_k_fb, resilience_vuln_fb, resilience_tmax_fb, resilience_genus, resilience_family,
          m, m_fl, m_fb, m_tmax_fb, m_vonb_fb, m_genus, m_family,
-         everything())
+         everything()) %>% 
+  # Unique
+  unique()
   
 # Inspect completeness
 freeR::complete(lhdata)
