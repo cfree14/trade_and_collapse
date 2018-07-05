@@ -16,6 +16,7 @@ library(mapdata)
 library(freeR)
 
 # Directories
+gisdir <- "data/gis_data"
 faodir <- "data/gis_data/fao_stat_areas/gis_data"
 eezdir <- "data/gis_data/World_EEZ_v9_20161021_LR"
 datadir <- "data/fao_landings/data"
@@ -52,7 +53,6 @@ isos_in_catch[!isos_in_catch%in%isos_in_eez1] # best one
 isos_in_catch[!isos_in_catch%in%isos_in_eez2]
 isos_in_catch[!isos_in_catch%in%isos_in_eez3]
 
-
 # Format EEZ data
 eez_data <- eez@data %>% 
   select(ISO_Ter1, Sovereign1) %>% 
@@ -76,8 +76,10 @@ stocks_data <- stocks@data %>%
          fao_code=as.character(fao_code)) %>% 
   select(areaid, fao_code, iso3) %>% 
   cbind(stock_centroids)
+stocks@data <- stocks_data
 
 # Export data
+writeOGR(stocks, dsn=gisdir, layer="FAO_ISO3_stocks", driver="ESRI Shapefile")
 write.csv(stocks_data, paste(datadir, "FAO_ISO3_stock_centroids.csv", sep="/"), row.names=F)
 
 
