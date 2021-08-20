@@ -11,6 +11,6 @@ The repository is organized using the following structure:
 - **TABLES** - A folder containing tables generated for the project
 - **FIGURES** - A folder containing figures generated for the project
 
-This project was funded as part of a [SESYNC Graduate Pursuit](https://www.sesync.org/opportunities/research-graduate-pursuit/graduate-pursuits-request-for-proposals): "Cross-scale exploitation patterns and marine population collapse in international seafood markets"
+This project was funded as part of a [SESYNC Graduate Pursuit](https://www.sesync.org/opportunities/research-graduate-pursuit/graduate-pursuits-request-for-proposals): "Cross-scale exploitation patterns and marine population collapse in international seafood markets".
 
 
