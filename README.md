@@ -1,4 +1,4 @@
-# Bilateral trade and fisheries exploitation
+# Impact of the global seafood trade on marine fisheries sustainability
 
 This repository contains the data and code for the data-poor stock assessment analysis conducted in support of the following paper:
 
